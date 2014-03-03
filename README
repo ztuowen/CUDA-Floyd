@@ -1,0 +1,116 @@
+Experiment for HIGH PERFORMANCE COMPUTING
+	Washall's algorithms
+
+===========================    Structure    ===========================
+
+	input		- holds the generated input file
+	sequential	- holds the CPU implementation
+		washall-cpu		- executable of the CPU implementation
+			washall-cpu [output.txt] [input.txt]
+	native		- holds the native(CUDA) implementation
+		washall-cuda	- executable of the CUDA implementation
+			washall-cuda [output.txt] [input.txt]
+	scripts		- scripts used in makefiles & test
+	testgen		- testfile generator
+		washall-test	- executable of the test file generator
+			washall-test [N] (testfile)
+
+===========================     Makefile    ===========================
+	
+makefile contains several target:
+	all		: make everything
+	clean	: clean all the executables as well as *.o s generated
+	run		: run the two implementations, regenerate testfile
+	exe		: run the two implementations, does not regenerate testfile
+	diff	: compare the results of two implementations
+	
+	testfile	: generate a test file with 2048 nodes, that is a matrix with size 2048x2048
+	washall-test: test generator
+	washall-cuda: native implementation
+	washall-cpu : sequential implementation on the cpu
+	
+washall-cuda uses the blocked implementation with float
+
+===========================Compile & Execute===========================
+
+1. First goto the root directory (project) and run:
+
+	make
+		or
+	make all
+	
+	to make everything
+
+2. Run:
+
+	make run
+	
+	Executes washall-cuda as well as washall-cpu.
+	input will be generated with 2048 nodes and the file is located in the input directory named matrix.txt.
+	output will be put to the output directory with cudamatrix.txt for washall-cuda and cpumatrix.txt for washall-cpu 
+	WARNING: test file will be remake whenever you type this.
+
+2. To compare the result, type and enter:
+	
+	make diff
+	
+	if you have already run the first step this should provide you with a result stating wether the two output files differ.
+	
+===========================  Compile Only   ===========================
+
+To compile everything just run:
+
+	make all
+		or
+	make
+	
+To compile specific program:
+
+	make washall-test
+		for test file generator
+	make washall-cuda
+		or
+	make washall-cpu
+	
+To make a testfile
+
+	make testfile
+		will produce one with the size specified in the makefile (default 2048)
+	scripts/generate-testfile.sh [[Number of nodes]]
+		will produce one with arbitrary size
+	
+To run the test without overwriten customized testfile
+	
+	make exe
+	
+========================= Changing Input size =========================
+
+Follow the steps above or change the makefile
+
+	vim makefile
+	
+	find the first line:
+		TESTSIZE=2048
+	use i or R to change it to any number you want(preferably smaller than 17408, largest I've ever tested, that is over 2GB in memory!)
+
+============================ Other scripts ============================
+
+scripts/time.sh [[program]]
+	
+	This script times the program with input size from 1024 to 17408 at step length 1024
+	the script will stop when ever the average execution time(5 times) execeed one minute
+	the results is writen to [[program]].log
+	for example, run:
+	
+		scripts/time.sh native/washall-cuda
+		
+	The scripts will start running automatically, and prints its result to the log file:
+		
+		native/washall-cuda.log:
+			1024 10.5695
+			2048 65.5086
+			...
+			...
+			...
+			16384 23661.6
+			17408 28533.8
