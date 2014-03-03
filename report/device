@@ -1,0 +1,13 @@
+template<typename T>
+__global__ void cuFloydKnl(T *adjmat,const MatrixDim dim,const unsigned int k)
+{
+  unsigned int row=blockIdx.y;
+  unsigned int col=BLKSIZE*blockIdx.x+threadIdx.x;
+  T rowdat;
+  T len;
+  T nlen;
+  rowdat=adjmat[row*dim.stride+k];
+  nlen=rowdat+adjmat[k*dim.stride+col];
+  len=adjmat[row*dim.stride+col];
+  adjmat[row*dim.stride+col]=nlen>len?len:nlen;
+}

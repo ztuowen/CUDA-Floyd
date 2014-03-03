@@ -1,0 +1,5 @@
+for (int k=0;k<dim.num;++k)
+{
+  cuFloydKnl<<<dim3((int)ceil(dim.num/double(BLKSIZE)),dim.num,1),BLKSIZE>>>(cuMat,dim,k);
+  cudaThreadSynchronize();
+}

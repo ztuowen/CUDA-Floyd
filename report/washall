@@ -1,0 +1,5 @@
+for k:=0 to N-1
+for i:=0 to N-1
+for j:=0 to N-1
+  if d[i][k]+d[k][j]<d[i][j] then
+    d[i][j]=d[i][k]+d[k][j];

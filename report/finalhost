@@ -1,0 +1,6 @@
+for (int k=0;k<dim.stride;k+=ITERSIZE)
+{
+  cuFloydIDKnl<<<1,dim3(ITERSIZE,16,1)>>>(cuMat,dim,k);
+  cuFloydSDKnl<<<dim3(dim.stride/ITERSIZE,2,1),dim3(16,ITERSIZE,1)>>>(cuMat,dim,k);
+  cuFloydDDKnl<<<dim3(dim.stride/ITERSIZE,dim.stride/ITERSIZE,1),dim3(16,ITERSIZE,1)>>>(cuMat,dim,k);
+}

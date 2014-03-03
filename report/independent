@@ -1,0 +1,28 @@
+template<typename T>
+__global__ void cuFloydIDKnl(T *adjmat,const MatrixDim dim,const unsigned int node)
+{
+  unsigned int x=threadIdx.x,y=threadIdx.y;
+  unsigned int pos=(node+y)*dim.stride+node+x;
+  __shared__ T tmpL[4][16][16],tmpR[16][64];
+  T len[4];
+  T nlen;
+  for (int i=0;i<4;++i)
+    len[i]=adjmat[pos+((i*dim.stride)<<4)];
+  for (int i=0;i<4;++i)
+  for (int k=0;k<16;++k)
+  {
+    tmpR[y][x]=len[i];
+    if ((x>>4)==i)
+      for (int j=0;j<4;++j)
+        tmpL[j][y][x&15]=len[j];
+    __syncthreads();
+    for (int j=0;j<4;++j)
+    {
+      nlen=tmpL[j][y][k]+tmpR[k][x];
+      len[j]=len[j]>nlen?nlen:len[j];
+    }
+    __syncthreads();
+  }
+  for (int i=0;i<4;++i)
+    adjmat[pos+((i*dim.stride)<<4)]=len[i];
+}

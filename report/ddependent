@@ -1,0 +1,35 @@
+template<typename T>
+__global__ void
+__launch_bounds__(1024, 2)
+cuFloydDDKnl(T *adjmat,const MatrixDim dim,const unsigned int node)
+{
+  unsigned int x=threadIdx.x,y=threadIdx.y,ry,rx;
+  ry=y&15;
+  rx=(y&0xFFF0)+x;
+  unsigned int bx=blockIdx.x,by=blockIdx.y;
+  unsigned int posl=(by*ITERSIZE+y)*dim.stride+node+x
+        ,posr=(node+ry)*dim.stride+bx*ITERSIZE+rx
+        ,pos=(by*ITERSIZE+y)*dim.stride+bx*ITERSIZE+x;
+  __shared__ T tmpL[ITERSIZE][16],tmpR[16][ITERSIZE];
+  T len[4];
+  T nlen;
+  for (int i=0;i<4;++i)
+    len[i]=adjmat[pos+(i<<4)];
+  for (int i=0;i<4;++i)
+  {
+    tmpL[y][x]=adjmat[posl];
+    posl+=16;
+    tmpR[ry][rx]=adjmat[posr];
+    posr+=(dim.stride<<4);
+    __syncthreads();
+    for (int j=0;j<4;++j)
+    for (int k=0;k<16;++k)
+    {
+      nlen=tmpL[y][k]+tmpR[k][(j<<4)+x];
+      len[j]=len[j]>nlen?nlen:len[j];
+    }
+    __syncthreads();
+  }
+  for (int i=0;i<4;++i)
+    adjmat[pos+(i<<4)]=len[i];
+}
