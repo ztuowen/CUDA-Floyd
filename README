@@ -1,5 +1,16 @@
 Experiment for HIGH PERFORMANCE COMPUTING
 	Washall's algorithms
+	
+===========================     Results     ===========================
+
+It uses staged-load blocked method for calcuation. For more information please refer to 
+	the report.
+It achieves astounding speed of 28.5 seconds for calculating the shortest path of adjacent
+	matrix with 17408 vertices.
+	The largest data I've ever tested with the CPU is 5120 vertices that cost 115 seconds
+		which finished in less than 1 second using CUDA(143.7x speedup).
+	It is anticipated that for even larger dataset the speedup might be even more significant
+		but I couldn't test them on my small desktop that only equipped with a 770 GTX.
 
 ===========================    Structure    ===========================
 
